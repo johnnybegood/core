@@ -141,6 +141,7 @@ FLOWS = [
     "konnected",
     "kostal_plenticore",
     "kraken",
+    "ksenia_lares",
     "kulersky",
     "life360",
     "lifx",
