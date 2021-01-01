@@ -13,18 +13,17 @@ _LOGGER = logging.getLogger(__name__)
 class LaresBase:
     """The implementation of the Lares base class."""
 
-    def __init__(self, host: str, username: str, password: str):
+    def __init__(self, data: dict):
+        username = data["username"]
+        password = data["password"]
+        host = data["host"]
+
         self._auth = aiohttp.BasicAuth(username, password)
         self._host = f"http://{host}:4202"
-
-    async def ping(self):
-        """Test connection"""
-        return True
 
     async def info(self):
         """Get device info"""
         response = await self.get("info/generalInfo.xml")
-        _LOGGER.info(response)
 
         if response is None:
             return None
@@ -35,6 +34,28 @@ class LaresBase:
         }
 
         return info
+
+    async def zoneDescriptions(self):
+        """Get available zones"""
+        response = await self.get("zones/zonesDescription48IP.xml")
+
+        if response is None:
+            return None
+
+        zones = response.xpath("/zonesDescription/zone")
+
+        return [zone.text for zone in zones]
+
+    async def zones(self):
+        """Get available zones"""
+        response = await self.get("zones/zonesStatus48IP.xml")
+
+        if response is None:
+            return None
+
+        zones = response.xpath("/zonesStatus/zone/status")
+
+        return [zone.text for zone in zones]
 
     async def get(self, path):
         """Generic send method."""

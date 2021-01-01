@@ -21,7 +21,7 @@ async def validate_input(hass: core.HomeAssistant, data):
     """
     # TODO validate the data can be used to set up a connection.
 
-    client = LaresBase(data["host"], data["username"], data["password"])
+    client = LaresBase(data)
 
     info = await client.info()
 
