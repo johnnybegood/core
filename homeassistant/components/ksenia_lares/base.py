@@ -2,6 +2,7 @@
 import logging
 
 import asyncio
+import re
 import aiohttp
 from aiohttp.http import RESPONSES
 
@@ -53,9 +54,16 @@ class LaresBase:
         if response is None:
             return None
 
-        zones = response.xpath("/zonesStatus/zone/status")
+        zones = response.xpath("/zonesStatus/zone")
 
-        return [zone.text for zone in zones]
+        return [
+            {
+                "status": zone.find("status").text,
+                "bypass": zone.find("bypass").text,
+                "alarm": zone.find("alarm").text,
+            }
+            for zone in zones
+        ]
 
     async def get(self, path):
         """Generic send method."""
