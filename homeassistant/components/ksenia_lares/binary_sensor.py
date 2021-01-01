@@ -5,7 +5,12 @@ import logging
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
 
-from .const import EVENT_DATA_RECEIVED
+from .const import (
+    EVENT_DATA_RECEIVED,
+    ZONE_STATUS_ALARM,
+    ZONE_STATUS_NOT_USED,
+    ZONE_BYPASS_ON,
+)
 from .base import LaresBase
 
 _LOGGER = logging.getLogger(__name__)
@@ -29,7 +34,7 @@ async def async_setup_entry(hass, config_entry, async_add_devices):
 class LaresSensor(BinarySensorEntity):
     """An implementation of a Lares door/window/motion sensor."""
 
-    def __init__(self, client, description, state):
+    def __init__(self, client, description, zone):
         """Initialize a the switch."""
         BinarySensorEntity.__init__(self)
 
@@ -37,7 +42,7 @@ class LaresSensor(BinarySensorEntity):
         self._last_motion = datetime.datetime.min
         self._client = client
         self._description = description
-        self._zone_state = state
+        self._zone = zone
 
     @property
     def unique_id(self):
@@ -52,12 +57,15 @@ class LaresSensor(BinarySensorEntity):
     @property
     def is_on(self):
         """Return the state of the sensor."""
-        return True
+        return self._zone["status"] == ZONE_STATUS_ALARM
 
     @property
     def available(self):
         """Return True if entity is available."""
-        return True
+        return (
+            self._zone["status"] != ZONE_STATUS_NOT_USED
+            or self._zone["status"] == ZONE_BYPASS_ON
+        )
 
     @property
     def device_class(self):
